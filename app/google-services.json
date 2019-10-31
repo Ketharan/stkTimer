@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "436881157981",
+    "firebase_url": "https://stkmobile-32b8b.firebaseio.com",
+    "project_id": "stkmobile-32b8b",
+    "storage_bucket": "stkmobile-32b8b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436881157981:android:9231e9db2dda6015",
+        "android_client_info": {
+          "package_name": "matlogic.stktimer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "436881157981-2q3ekt3tc7sqr2p8h5psttms4jmgm3lm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+            "current_key": "AIzaSyAZy1UU6OrSMGZImHpJ_CXLwZsKrbHGQOI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
