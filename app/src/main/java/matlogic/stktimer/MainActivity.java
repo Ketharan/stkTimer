@@ -27,11 +27,23 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
 
     private long timeCountInMilliSeconds = 3 * 60000;
-    private long timeCount = 3 * 60000;
+    private long timeCount = 0;
+    private boolean needRunning = true;
+
+    public boolean isNeedRunning() {
+        return needRunning;
+    }
+
+    public void setNeedRunning(boolean needRunning) {
+        this.needRunning = needRunning;
+    }
+
+
+
 
     private enum TimerStatus {
         STARTED,
@@ -48,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView imageViewReset;
     private ImageView imageViewStartStop;
     private CountDownTimer countDownTimer = null;
+    private CountDownTimer secondaryTimer = null;
 
 
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -72,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // method call to initialize the views
         initViews();
         // method call to initialize the listeners
-        initListeners();
+
 
         // Attach a listener to read the data at our posts reference
         DatabaseReference ref1 = database.getReference("status");
@@ -104,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("status", dataSnapshot.getValue().toString());
                 timeCountInMilliSeconds = Integer.parseInt(dataSnapshot.getValue().toString())*1000;
-                timeCount = Integer.parseInt(dataSnapshot.getValue().toString())*1000;
 
             }
 
@@ -130,47 +142,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imageViewStartStop = (ImageView) findViewById(R.id.imageViewStartStop);
     }
 
-    /**
-     * add a firebase listerner to listen from the status point
-     * if status = {start, stop, reset}
-     * if start  => start timer;
-     * if reset => reset timer;
-     */
 
 
 
 
-    /**
-     * add firebase listener to lister from time point
-     * if time value is integer
-     * call set time for change
-     */
 
-
-    /**
-     * method to initialize the click listeners
-     */
-    private void initListeners() {
-        imageViewReset.setOnClickListener(this);
-        imageViewStartStop.setOnClickListener(this);
-    }
-
-    /**
-     * implemented method to listen clicks
-     *
-     * @param view
-     */
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.imageViewReset:
-                reset();
-                break;
-            case R.id.imageViewStartStop:
-                startStop();
-                break;
-        }
-    }
 
     /**
      * method to reset count down timer
@@ -180,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             stopCountDownTimer();
         }
 
-        timeCountInMilliSeconds = timeCount;
         textViewTime.setText(hmsTimeFormatter(timeCount));
         setProgressBarValues();
         //textViewTime.setText(hmsTimeFormatter(timeCountInMilliSeconds));
@@ -192,8 +167,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // making edit text editable
         // editTextMinute.setEnabled(true);
         // changing the timer status to stopped
-        textViewTime.setTextColor(Color.parseColor("#2E7D32"));
-        timerStatus = TimerStatus.STOPPED;
+        textViewTime.setTextColor(Color.parseColor("#16961A"));
+        setNeedRunning(false);
     }
 
 
@@ -203,62 +178,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void stop(){
+        setNeedRunning(false);
         stopCountDownTimer();
     }
 
-
-    /**
-     * method to start and stop count down timer
-     */
-    private void startStop() {
-        if (timerStatus == TimerStatus.STOPPED) {
-
-            // call to initialize the timer values
-            setTimerValues();
-            // call to initialize the progress bar values
-            setProgressBarValues();
-            // showing the reset icon
-            imageViewReset.setVisibility(View.VISIBLE);
-            // changing play icon to stop icon
-            imageViewStartStop.setImageResource(R.drawable.icon_stop);
-            // making edit text not editable
-            editTextMinute.setEnabled(false);
-            // changing the timer status to started
-            timerStatus = TimerStatus.STARTED;
-            // call to start the count down timer
-            startCountDownTimer();
-
-        } else {
-
-            // hiding the reset icon
-            imageViewReset.setVisibility(View.GONE);
-            // changing stop icon to start icon
-            imageViewStartStop.setImageResource(R.drawable.icon_start);
-            // making edit text editable
-            editTextMinute.setEnabled(true);
-            // changing the timer status to stopped
-            timerStatus = TimerStatus.STOPPED;
-            stopCountDownTimer();
-
-        }
-
-    }
-
-    /**
-     * method to initialize the values for count down timer
-     */
-    private void setTimerValues() {
-        int time = 0;
-        if (!editTextMinute.getText().toString().isEmpty()) {
-            // fetching value from edit text and type cast to integer
-            time = Integer.parseInt(editTextMinute.getText().toString().trim());
-        } else {
-            // toast message to fill edit text
-            Toast.makeText(getApplicationContext(), getString(R.string.message_minutes), Toast.LENGTH_LONG).show();
-        }
-        // assigning values after converting to milliseconds
-        timeCountInMilliSeconds = time * 60 * 1000;
-    }
 
     private long untillmillis;
 
@@ -270,29 +193,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.untillmillis = untillmillis;
     }
 
-    /**
+    /**0:00
+
+
      * method to start count down timer
      */
     private void startCountDownTimer() {
 
-
+        setNeedRunning(true);
         countDownTimer = new CountDownTimer(timeCountInMilliSeconds, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 setUntillmillis(millisUntilFinished);
-                textViewTime.setText(hmsTimeFormatter(millisUntilFinished));
-                progressBarCircle.setProgress((int) (millisUntilFinished / 1000));
+                long passedMillis = timeCountInMilliSeconds - millisUntilFinished + 1000;
+                textViewTime.setText(hmsTimeFormatter(passedMillis));
+                progressBarCircle.setProgress((int) (passedMillis / 1000));
                 if (millisUntilFinished < 60000){
                     textViewTime.setTextColor(Color.parseColor("#FF6F00"));
                     progressBarCircle.setDrawingCacheBackgroundColor(Color.parseColor("#FF6F00"));
                 }
+
             }
 
             @Override
             public void onFinish() {
-                textViewTime.setText(hmsTimeFormatter(getUntillmillis()-1000));
+                textViewTime.setTextColor(Color.parseColor("#C71D12"));
+                progressBarCircle.setProgress((int) (timeCountInMilliSeconds / 1000));
+                secondaryTimer = new CountDownTimer(300000,1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        if (!isNeedRunning()) {
+                            this.cancel();
+                        } else {
+                            long secPassedMills = timeCountInMilliSeconds + 300000 - millisUntilFinished;
+                            textViewTime.setText(hmsTimeFormatter(secPassedMills));
+                        }
 
-                progressBarCircle.setProgress((int) ((getUntillmillis()-1000) / 1000));
+
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+                    }
+                };
+                secondaryTimer.start();
+//                textViewTime.setText(hmsTimeFormatter(getUntillmillis()-1000));
+
+
 
                 // call to initialize the progress bar values
                 //setProgressBarValues();
@@ -301,13 +250,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // changing stop icon to start icon
                 //imageViewStartStop.setImageResource(R.drawable.icon_start);
                 // making edit text editable
-               // editTextMinute.setEnabled(true);
+                // editTextMinute.setEnabled(true);
                 // changing the timer status to stopped
                 //textViewTime.setTextColor(Color.parseColor("#2E7D32"));
                 //timerStatus = TimerStatus.STOPPED;
             }
 
-        }.start();
+        };
         countDownTimer.start();
     }
 
@@ -324,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setProgressBarValues() {
 
         progressBarCircle.setMax((int) timeCountInMilliSeconds / 1000);
-        progressBarCircle.setProgress((int) timeCountInMilliSeconds / 1000);
+        progressBarCircle.setProgress(0);
     }
 
 
@@ -369,16 +318,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
-
-    // Shows the system bars by removing all the flags
-// except for the ones that make the content appear under the system bars.
-    private void showSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
-
-
 }
