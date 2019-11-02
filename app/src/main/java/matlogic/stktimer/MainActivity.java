@@ -12,6 +12,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         SpannableString s = new SpannableString("nrhw;fiz - 2018");
         s.setSpan(new TypefaceSpan(this, "baamini.ttf"), 0, s.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ActionBar actionBar = getSupportActionBar();
         //actionBar.setTitle(s);
         actionBar.hide();
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                         if (!isNeedRunning()) {
                             this.cancel();
                         } else {
-                            long secPassedMills = timeCountInMilliSeconds + 300000 - millisUntilFinished;
+                            long secPassedMills = timeCountInMilliSeconds + 300000 - millisUntilFinished + 1000;
                             textViewTime.setText(hmsTimeFormatter(secPassedMills));
                         }
 
